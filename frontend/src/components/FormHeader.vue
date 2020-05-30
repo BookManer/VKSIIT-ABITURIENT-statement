@@ -53,10 +53,10 @@ export default {
         z-index: 5;
 
         @media all and (max-width: 800px) {
-            padding: 0 0 10px 25px;
+            padding: 10px 0 10px 25px;
         }
         @media all and (max-width: 600px) {
-            padding: 0 0 0 15px;
+            padding: 10px 0 10px 15px;
         }
 
         &__icon-container {
@@ -132,11 +132,15 @@ export default {
             color: #fff;
 
             overflow: hidden;
-            z-index: 7;
+            z-index: 3;
 
             @media all and (max-width: 800px) {
                 font-size: 28px;
-                padding: 14px 25px 22px 30px;
+                padding: 14px 19px 22px 30px;
+            }
+
+            @media all and (max-width: 600px) {
+                display: none;
             }
 
             &:before {

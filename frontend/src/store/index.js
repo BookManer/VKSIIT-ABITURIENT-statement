@@ -67,6 +67,12 @@ export default new Vuex.Store({
     },
     SET_DATA_FORMS(state, payload) {
       state.dataForms[`form${state.step}`] = payload;
+    },
+    RESET_DATA_FORMS(state) {
+      const iterator = new Array(state.number_step).fill('');
+      iterator.forEach((el, index) => {
+        state.dataForms[`form${index}`] = {};
+      })
     }
   },
   actions: {

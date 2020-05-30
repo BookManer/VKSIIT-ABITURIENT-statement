@@ -1,6 +1,6 @@
 <template>
   <v-app class="form-con">
-    <v-card flat :loading="isLoading">
+    <v-card class="form-con__wrap" flat :loading="isLoading">
       <v-progress-linear
         class="form-con__progressbar"
         buffer-value="100"
@@ -31,7 +31,11 @@
               "
               :name="field.attrs.name"
               :type="field.attrs.type"
-              :ref="`${field.folderComponent === 'VFileInput' ? `inputFile_${field.attrs.name}` : false}`"
+              :ref="
+                `${
+                  field.folderComponent === 'VFileInput' ? `inputFile_${field.attrs.name}` : false
+                }`
+              "
               v-model="$v.form[field.valid_model].$model"
             ></component>
             <div
@@ -53,10 +57,19 @@
             </div>
           </div>
         </div>
-        <v-btn class="form-con__btn" v-if="step !== number_step - 1" @click="onNext" dark>Дальше</v-btn>
-        <v-btn class="form-con__btn" v-else @click="onSubmit" dark>Завершить</v-btn>
+        <v-btn class="form-con__btn" v-if="step !== number_step - 1" @click="onNext" dark
+          >Дальше</v-btn
+        >
+        <v-btn class="form-con__btn" v-else @click="onSubmit" :loading="isLoading" dark>Завершить</v-btn>
       </form>
     </v-card>
+    <HomeFormBottomSheet :sheet="isSentMail" @onStartStep="onNext"></HomeFormBottomSheet>
+    <div class="text-center">
+        <v-overlay :value="isLoading">
+          <v-progress-circular indeterminate size="64"></v-progress-circular>
+          <p>{{loadingText}}</p>
+        </v-overlay>
+    </div>
   </v-app>
 </template>
 
@@ -73,6 +86,7 @@ import VFileInput from "vuetify/lib/components/VFileInput/VFileInput.js";
 import VCheckbox from "vuetify/lib/components/VCheckbox/VCheckbox.js";
 import VSelect from "vuetify/es5/components/VSelect/index.js";
 import VMenu from "vuetify/lib/components/VMenu/VMenu.js";
+import HomeFormBottomSheet from "./HomeFormBottomSheet.vue";
 
 const vuetifyComponents = {
   VTextField,
@@ -99,11 +113,14 @@ export default {
     return {
       isLoading: false,
       checkedAllFormValid: false,
-      form: {},
+      isSentMail: undefined,
+      loadingText: '',
+      form: {}
     };
   },
   created() {
     this.setDefaultDataForm();
+    this.isSentMail = false;
   },
   beforeMount() {
     this.schemas.forEach(model => {
@@ -112,10 +129,15 @@ export default {
         validationObject.form[valid_model] = { ...validators };
       });
     });
+    this.isSentMail = false;
+  },
+  destroyed() {
+    store.commit("RESET_DATA_FORMS");
+    this.form = {};
   },
   computed: {
     ...mapState(["step", "number_step"]),
-    ...mapGetters(['getFieldsDataForms']),
+    ...mapGetters(["getFieldsDataForms"]),
     isDisabled() {
       return this.checkedAllFormValid;
     }
@@ -126,7 +148,7 @@ export default {
     },
     async onNext() {
       const { step, number_step, validateForm, form } = this;
-
+      
       if (!validateForm()) {
         this.checkedAllFormValid = false;
 
@@ -136,6 +158,8 @@ export default {
           store.commit("SET_STEP", step + 1);
         } else {
           store.commit("SET_STEP", 0);
+          store.commit('RESET_DATA_FORMS');
+          this.isSentMail = false;
         }
 
         this.setDefaultDataForm();
@@ -144,35 +168,42 @@ export default {
       }
     },
     async onSubmit() {
-       if (!this.validateForm()) {
+      if (!this.validateForm()) {
+        this.isSentMail = false;
         this.checkedAllFormValid = false;
         this.isLoading = true;
         store.commit("SET_DATA_FORMS", this.form);
 
         try {
-            let payload = this.getFieldsDataForms;
+          let payload = this.getFieldsDataForms;
 
-            const pdfBlob = await pdfCreate(payload);
-            this.appendFormDataByFile();
-            formDataObject.append('zayvlenie', pdfBlob, 'zayvlenie.pdf');
+          this.loadingText = 'Создание документа-заявление в pdf формате...';
+          const pdfBlob = await pdfCreate(payload);
+          this.appendFormDataByFile();
+          formDataObject.append("zayvlenie", pdfBlob, "zayvlenie.pdf");
 
-            await sendMail(payload.email, formDataObject);
+          this.loadingText = 'Отправляем все данные на почту...';
+          await sendMail(payload.email, formDataObject);
+          this.loadingText = 'Готово!!!';
+          setTimeout(() => {
             this.isLoading = false;
-            this.onNext();
+            this.isSentMail = true;
+          }, 2000);
         } catch (e) {
-            console.error('Error:\n',e);
+          console.error("Error:\n", e);
+          this.isSentMail = false;
         }
-
-       } else {
-         this.checkedAllFormValid = true;
-       }
+      } else {
+        this.checkedAllFormValid = true;
+      }
     },
     appendFormDataByFile() {
       const fields = this.getFieldsDataForms;
-      Object.keys(fields).forEach((key) => {
+      Object.keys(fields).forEach(key => {
         const field = fields[key];
 
-        if(field instanceof File) {
+        if (field instanceof File) {
+          console.log(key, field);
           formDataObject.append(key, field);
         }
       });
@@ -200,7 +231,7 @@ export default {
     }
   },
   validations: { ...validationObject },
-  components: { VTextField, VFileInput, VCheckbox, VSelect, VMenu }
+  components: { VTextField, VFileInput, VCheckbox, VSelect, VMenu, HomeFormBottomSheet }
 };
 </script>
 
@@ -210,7 +241,7 @@ export default {
 }
 
 .form-con {
-  & > div {
+  &__wrap {
     display: flex;
     flex-flow: column nowrap;
     padding-bottom: 60px;

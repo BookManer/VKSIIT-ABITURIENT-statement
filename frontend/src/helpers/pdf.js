@@ -35,6 +35,7 @@ const pdfCreate = async payload => {
   // Array: 0 - year, 1 - month, 2 - day
   const dateGiving = payload.date_giving.split('-');
   const dateBirthday = payload.date_birthday.split('-');
+  console.log(payload);
 
   let docDefinition = {
     pageMargins,
@@ -109,7 +110,7 @@ const pdfCreate = async payload => {
           lineHeight: 1.15,
       },
       {
-          text: 'Прошу зачислить меня на очную форму обучения по специальности ' + `«${payload.speciality}» в рамках цифр\n`,
+          text: 'Прошу зачислить меня на очную форму обучения по специальности ' + `«${payload.specialty}» в рамках цифр\n`,
           margin: [11*3, 0, 0, 0],
           lineHeight: 1.15,
       },
@@ -185,8 +186,10 @@ const pdfCreate = async payload => {
   const pdf = await pdfMake.createPdf(docDefinition);
   return new Promise((res, rej) => {
     pdf.getBlob((blob) => {
-      res(blob);
-    })
+      setTimeout(() => {
+        res(blob);
+      }, 1500);
+    });
   })
 };
 

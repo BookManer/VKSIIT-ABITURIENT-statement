@@ -299,9 +299,6 @@ export default [
                     label: 'Нуждаюсь в общежитии',
                 },           
                 valid_model: 'need_dormitory',
-                validators: {
-                    required,
-                },
                 folderComponent: 'VCheckbox', 
                 component: 'v-checkbox',
             }, {
