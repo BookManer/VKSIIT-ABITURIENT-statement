@@ -3,8 +3,7 @@
     <v-bottom-sheet v-model="sheet" persistent>
     <v-sheet class="text-center" height="200px">
         <v-btn class="mt-6" color="success" @click="onGoBack">Вернуться в начало</v-btn>
-        <div class="py-3">Ваша заявка отправлена успешно. Благодарим, 
-        что выбрали нашу учебное заведение</div>
+        <div class="py-3">{{submitResultText}}</div>
     </v-sheet>
     </v-bottom-sheet>
   </div>
@@ -13,7 +12,7 @@
 <script>
 export default {
     name: 'HomeFormBottomSheet',
-    props: ['sheet'],
+    props: ['sheet', 'submitResultText'],
     methods: {
       onGoBack() {
         this.$emit('onStartStep');

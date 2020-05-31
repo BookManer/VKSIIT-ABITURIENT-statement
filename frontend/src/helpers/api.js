@@ -15,5 +15,6 @@ const apiJson = axios.create({
 
 export default async function sendMail(email, formData) {
     await apiFormData.post('/sendMail', formData);
-    await apiJson.post('/sendMail', { email });
+    const res = await apiJson.post('/sendMail', { email });
+    return res;
 }

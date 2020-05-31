@@ -10,7 +10,7 @@ let transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: 'borshblack@gmail.com',
-        pass: "noangokeq2020",
+        pass: process.env.GMAIL_PASSWORD,
     }
 })
 
@@ -41,18 +41,20 @@ server.post(`/${API}/sendMail`, (req, res) => {
         if (Object.entries(formDataObject).length != 0) {
             let mailOptions = {
                 from: req.body.email,
-                to: 'borshblack@gmail.com',
+                to: process.env.TO_MAIL,
                 subject: 'Заявление абитуриента',
                 text: `Почта отправителя: ${req.body.email}`,
                 attachments: formDataObject,
             }
-
             transporter.sendMail(mailOptions, function(err, info) {
                 if (err) {
                     console.log(err);
+                    res.status(500).send('Не удалось отправить сообщение, попробуйте ещё раз');
                 } else {
-                    console.log('Email resent: ', info.response);
-                    res.send('ok');
+                    const message = `Ваша заявка отправлена успешно. Благодарим,
+                    что выбрали нашу учебное заведение.
+                    Письмо было отправлено на почту ${mailOptions.to}`;
+                    res.status(200).send(message);
                 }
             })
         }

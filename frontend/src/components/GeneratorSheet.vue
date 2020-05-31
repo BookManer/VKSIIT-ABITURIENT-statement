@@ -63,7 +63,7 @@
         <v-btn class="form-con__btn" v-else @click="onSubmit" :loading="isLoading" dark>Завершить</v-btn>
       </form>
     </v-card>
-    <HomeFormBottomSheet :sheet="isSentMail" @onStartStep="onNext"></HomeFormBottomSheet>
+    <HomeFormBottomSheet :sheet="isSentMail" :message="submitResultText" @onStartStep="onNext"></HomeFormBottomSheet>
     <div class="text-center">
         <v-overlay :value="isLoading">
           <v-progress-circular indeterminate size="64"></v-progress-circular>
@@ -114,6 +114,7 @@ export default {
       isLoading: false,
       checkedAllFormValid: false,
       isSentMail: undefined,
+      submitResultText: '',
       loadingText: '',
       form: {}
     };
@@ -175,20 +176,8 @@ export default {
         store.commit("SET_DATA_FORMS", this.form);
 
         try {
-          let payload = this.getFieldsDataForms;
-
-          this.loadingText = 'Создание документа-заявление в pdf формате...';
-          const pdfBlob = await pdfCreate(payload);
-          this.appendFormDataByFile();
-          formDataObject.append("zayvlenie", pdfBlob, "zayvlenie.pdf");
-
-          this.loadingText = 'Отправляем все данные на почту...';
-          await sendMail(payload.email, formDataObject);
-          this.loadingText = 'Готово!!!';
-          setTimeout(() => {
-            this.isLoading = false;
-            this.isSentMail = true;
-          }, 2000);
+          await this.createPdfFile();
+          await this.asyncSendMail();
         } catch (e) {
           console.error("Error:\n", e);
           this.isSentMail = false;
@@ -196,6 +185,31 @@ export default {
       } else {
         this.checkedAllFormValid = true;
       }
+    },
+    async createPdfFile() {
+      let payload = this.getFieldsDataForms;
+
+      this.loadingText = 'Создание документа-заявление в pdf формате...';
+      const pdfBlob = await pdfCreate(payload);
+      this.appendFormDataByFile();
+      formDataObject.append("zayvlenie", pdfBlob, "zayvlenie.pdf");
+    },
+    async asyncSendMail() {
+      let payload = this.getFieldsDataForms;
+
+      this.loadingText = 'Отправляем все данные на почту...';
+      await sendMail(payload.email, formDataObject)
+        .then(({data}) => { this.submitResultText = data })
+        .catch(({data}) => { this.submitResultText = data });
+      this.loadingText = 'Готово!!!';
+
+      return new Promise((res, rej) => {
+        setTimeout(() => {
+          this.isLoading = false;
+          this.isSentMail = true;
+          res();
+        }, 3000);
+      })
     },
     appendFormDataByFile() {
       const fields = this.getFieldsDataForms;
