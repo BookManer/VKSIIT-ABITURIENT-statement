@@ -2,6 +2,7 @@ require('dotenv').config(); // local access to env
 
 const express = require('express');
 const server = express();
+const path = require('path');
 const cors = require('cors');
 let multiparty = require('multiparty');
 let nodemailer = require('nodemailer');
@@ -10,7 +11,7 @@ let transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: 'borshblack@gmail.com',
-        pass: process.env.GMAIL_PASSWORD,
+        pass: 'noangokeq2021',
     }
 })
 
@@ -26,6 +27,13 @@ server.listen(process.env.PORT || 3000, () => {
 
 let formDataObject = {};
 
+<<<<<<< HEAD
+=======
+server.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+})
+
+>>>>>>> 55f0e32... changed
 server.post(`/${API}/sendMail`, (req, res) => {
     if (req.headers['content-type'].indexOf('multipart') != -1) {
         let form = new multiparty.Form();
