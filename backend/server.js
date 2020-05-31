@@ -27,13 +27,9 @@ server.listen(process.env.PORT || 3000, () => {
 
 let formDataObject = {};
 
-<<<<<<< HEAD
-=======
 server.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
 })
-
->>>>>>> 55f0e32... changed
 server.post(`/${API}/sendMail`, (req, res) => {
     if (req.headers['content-type'].indexOf('multipart') != -1) {
         let form = new multiparty.Form();
