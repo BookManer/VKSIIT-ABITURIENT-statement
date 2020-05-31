@@ -1,13 +1,15 @@
 import axios from 'axios';
 
+const hostname = 'https://integral-hold-278909.uc.r.appspot.com';
+
 const apiFormData = axios.create({
-    baseURL: 'http://localhost:3000/api/methods',
+    baseURL: `${hostname}/api/methods`,
     headers: {
         'Content-Type': 'multipart/form-data',
     }
 })
 const apiJson = axios.create({
-    baseURL: 'http://localhost:3000/api/methods',
+    baseURL: `${hostname}/api/methods`,
     headers: {
         'Content-Type': 'application/json',
     }

@@ -20,7 +20,7 @@ server.use(express.urlencoded({ extended: true })) // for parsing application/x-
 
 const API = "api/methods";
 
-server.listen(process.env.PORT || 3000, () => {
+server.listen(process.env.PORT || 443, () => {
     console.log("Server has been listened");
 });
 
