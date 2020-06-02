@@ -283,7 +283,25 @@ export default [
                 },
                 props: {
                     label: 'Категория сирот',
-                    items: ['item1', 'item2'],
+                    items: [{
+                        type: 'инвалид',
+                        accepted_document: [{
+                            id: 0,
+                            name: 'Подтверждение инвалидности',
+                        }],
+                    }, {
+                        type: 'сирота',
+                        accepted_document: [{
+                            id: 0,
+                            name: 'Подтверждение сиротства',
+                        }]
+                    }, {
+                        type: 'многодетная семья',
+                        accepted_document: [{
+                            id: 0,
+                            name: 'Подтверждение многодества, хах',
+                        }]
+                    }],
                 },           
                 valid_model: 'category_sirot',
                 validators: {
