@@ -5,7 +5,7 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    step: 0,
+    step: 3,
     number_step: 4,
     titles: [
       'О себе',

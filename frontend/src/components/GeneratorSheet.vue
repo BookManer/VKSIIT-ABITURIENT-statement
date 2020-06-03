@@ -10,65 +10,58 @@
         opacity="0.2"
         height="10"
       ></v-progress-linear>
+
       <form @submit="() => false" ref="customForm">
-        <div :class="{ 'form-con__fields': true, 'form-con__last-step': step == number_step - 1 }">
-          <div
-            v-for="field in schemas[step].fields"
+        <div :class="getClassFormCon">
+          <div v-for="field in schemas[step].fields"
             :key="field.valid_model"
             :class="{
               'form-con__field': true,
-              'form-con__checkbox-block': field.folderComponent === 'VCheckbox'
-            }"
-          >
+              'form-con__checkbox-block': field.folderComponent === 'FieldCheckbox'
+            }">
             <component
-              :is="field.component"
-              color="success"
-              v-bind="field.props"
-              :label="
-                `${field.props.label} ${
-                  !$v.form[field.valid_model].required && checkedAllFormValid ? '*' : ''
-                }`
-              "
-              :name="field.attrs.name"
-              :type="field.attrs.type"
-              :ref="
-                `${
-                  field.folderComponent === 'VFileInput' ? `inputFile_${field.attrs.name}` : false
-                }`
-              "
-              v-model="$v.form[field.valid_model].$model"
-            ></component>
-            <div
-              class="form-con__error-message"
-              v-if="$v.form[field.valid_model].$error && checkedAllFormValid"
+              :is="field.folderComponent"
+              :componentAttrs="field.props"
+              :DOMAttrs="field.attrs"
+              :checkedAllFormValid="checkedAllFormValid"
+              :validators="field.validators"
+              :propValidModel="field.valid_model"
+              v-model="form[field.valid_model]"
+              @checkValid="onCheckValidateField($event)"
             >
-              <div v-if="!$v.form[field.valid_model].required && checkedAllFormValid">
-                Поле обязательно для заполнения
-              </div>
-              <div v-if="$v.form[field.valid_model].email && checkedAllFormValid">
-                Такой почты не существует
-              </div>
-              <div v-if="$v.form[field.valid_model].minLength && checkedAllFormValid">
-                Значение содержит недостаточное количество символов
-              </div>
-              <div v-if="$v.form[field.valid_model].maxLength && checkedAllFormValid">
-                Значение содержит недостаточное количество символов
-              </div>
-            </div>
+              <template v-slot:default="{ validation }">
+                <FieldErrorMessage
+                  :validateFieldObject="validation"
+                  :validators="field.validators"
+                  :checkedAllFormValid="checkedAllFormValid"
+                  :propValidModel="field.valid_model"
+                ></FieldErrorMessage>
+              </template>
+            </component>
           </div>
         </div>
-        <v-btn class="form-con__btn" v-if="step !== number_step - 1" @click="onNext" dark
-          >Дальше</v-btn
-        >
-        <v-btn class="form-con__btn" v-else @click="onSubmit" :loading="isLoading" dark>Завершить</v-btn>
+        <v-btn class="form-con__btn"
+          v-if="step !== number_step - 1"
+          @click="onNext"
+          dark>Дальше</v-btn>
+        <v-btn class="form-con__btn"
+          v-else
+          @click="onSubmit"
+          :loading="isLoading"
+          dark>Завершить</v-btn>
       </form>
     </v-card>
-    <HomeFormBottomSheet :sheet="isSentMail" :message="submitResultText" @onStartStep="onNext"></HomeFormBottomSheet>
+
+    <HomeFormBottomSheet
+      :sheet="isSentMail"
+      :message="submitResultText"
+      @onStartStep="onNext"
+    ></HomeFormBottomSheet>
     <div class="text-center">
-        <v-overlay :value="isLoading">
-          <v-progress-circular indeterminate size="64"></v-progress-circular>
-          <p>{{loadingText}}</p>
-        </v-overlay>
+      <v-overlay :value="isLoading">
+        <v-progress-circular indeterminate size="64"></v-progress-circular>
+        <p>{{ loadingText }}</p>
+      </v-overlay>
     </div>
   </v-app>
 </template>
@@ -81,23 +74,13 @@ import Vue from "vue";
 import store from "../store/index.js";
 import { mapState, mapGetters } from "vuex";
 
-import VTextField from "vuetify/lib/components/VTextField/VTextField.js";
-import VFileInput from "vuetify/lib/components/VFileInput/VFileInput.js";
-import VCheckbox from "vuetify/lib/components/VCheckbox/VCheckbox.js";
-import VSelect from "vuetify/es5/components/VSelect/index.js";
-import VMenu from "vuetify/lib/components/VMenu/VMenu.js";
+import FieldTextField from "./form/FieldTextField.vue";
+import FieldFileInput from "./form/FieldFileInput.vue";
+import FieldSelect from "./form/FieldSelect.vue";
+import FieldCheckbox from "./form/FieldCheckbox";
+
+import FieldErrorMessage from "./FieldErrorMessage.vue";
 import HomeFormBottomSheet from "./HomeFormBottomSheet.vue";
-
-const vuetifyComponents = {
-  VTextField,
-  VFileInput,
-  VCheckbox,
-  VSelect
-};
-
-let validationObject = {
-  form: {}
-};
 
 var formDataObject = new FormData();
 
@@ -114,23 +97,17 @@ export default {
       isLoading: false,
       checkedAllFormValid: false,
       isSentMail: undefined,
-      submitResultText: '',
-      loadingText: '',
+      submitResultText: "",
+      loadingText: "",
+      validateObjectForm: {},
       form: {}
     };
   },
   created() {
-    this.setDefaultDataForm();
     this.isSentMail = false;
   },
   beforeMount() {
-    this.schemas.forEach(model => {
-      model.fields.forEach(field => {
-        const { valid_model, validators } = field;
-        validationObject.form[valid_model] = { ...validators };
-      });
-    });
-    this.isSentMail = false;
+    this.setDefaultDataForm();
   },
   destroyed() {
     store.commit("RESET_DATA_FORMS");
@@ -141,6 +118,10 @@ export default {
     ...mapGetters(["getFieldsDataForms"]),
     isDisabled() {
       return this.checkedAllFormValid;
+    },
+    getClassFormCon() {
+      const { step, number_step } = this;
+      return { "form-con__fields": true, "form-con__last-step": step == number_step - 1 };
     }
   },
   methods: {
@@ -149,8 +130,8 @@ export default {
     },
     async onNext() {
       const { step, number_step, validateForm, form } = this;
-      
-      if (!validateForm()) {
+
+      if (validateForm()) {
         this.checkedAllFormValid = false;
 
         store.commit("SET_DATA_FORMS", this.form);
@@ -159,17 +140,18 @@ export default {
           store.commit("SET_STEP", step + 1);
         } else {
           store.commit("SET_STEP", 0);
-          store.commit('RESET_DATA_FORMS');
+          store.commit("RESET_DATA_FORMS");
           this.isSentMail = false;
         }
 
+        this.validateObjectForm = {};
         this.setDefaultDataForm();
       } else {
         this.checkedAllFormValid = true;
       }
     },
     async onSubmit() {
-      if (!this.validateForm()) {
+      if (this.validateForm()) {
         this.isSentMail = false;
         this.checkedAllFormValid = false;
         this.isLoading = true;
@@ -189,7 +171,7 @@ export default {
     async createPdfFile() {
       let payload = this.getFieldsDataForms;
 
-      this.loadingText = 'Создание документа-заявление в pdf формате...';
+      this.loadingText = "Создание документа-заявление в pdf формате...";
       const pdfBlob = await pdfCreate(payload);
       this.appendFormDataByFile();
       formDataObject.append("zayvlenie", pdfBlob, "zayvlenie.pdf");
@@ -197,11 +179,15 @@ export default {
     async asyncSendMail() {
       let payload = this.getFieldsDataForms;
 
-      this.loadingText = 'Отправляем все данные на почту...';
+      this.loadingText = "Отправляем все данные на почту...";
       await sendMail(payload.email, formDataObject)
-        .then(({data}) => { this.submitResultText = data })
-        .catch(({data}) => { this.submitResultText = data });
-      this.loadingText = 'Готово!!!';
+        .then(({ data }) => {
+          this.submitResultText = data;
+        })
+        .catch(({ data }) => {
+          this.submitResultText = data;
+        });
+      this.loadingText = "Готово!!!";
 
       return new Promise((res, rej) => {
         setTimeout(() => {
@@ -209,7 +195,7 @@ export default {
           this.isSentMail = true;
           res();
         }, 3000);
-      })
+      });
     },
     appendFormDataByFile() {
       const fields = this.getFieldsDataForms;
@@ -225,16 +211,15 @@ export default {
       return false;
     },
     validateForm() {
-      this.schemas[store.state.step].fields.forEach(({ valid_model }) => {
-        this.$v.form[valid_model].$touch();
-      });
-      const isInvalidCurrentFields = this.schemas[store.state.step].fields.some(
-        ({ valid_model }) => {
-          return this.$v.form[valid_model].$invalid;
-        }
-      );
+      const arr = Object.keys(this.validateObjectForm);
+      const arrValidatObjectForm = Object.keys(this.validateObjectForm);
+      const requiredFields = this.schemas[this.step].fields.filter(({validators}) => !!validators);
 
-      return isInvalidCurrentFields;
+      return (
+        arr.every(key => {
+          return this.validateObjectForm[key];
+        }) && arrValidatObjectForm.length >= requiredFields.length
+      );
     },
     setDefaultDataForm() {
       const { step } = this;
@@ -242,10 +227,26 @@ export default {
       this.schemas[store.state.step].fields.forEach(({ valid_model }) => {
         Vue.set(this.form, valid_model, store.state.dataForms[`form${step}`][valid_model]);
       });
+    },
+    onCheckValidateField({ type_field, isValid }) {
+      this.validateObjectForm[type_field] = isValid;
+      const arr = Object.keys(this.validateObjectForm);
+
+      console.log(
+        arr.every(key => {
+          return this.validateObjectForm[key];
+        })
+      );
     }
   },
-  validations: { ...validationObject },
-  components: { VTextField, VFileInput, VCheckbox, VSelect, VMenu, HomeFormBottomSheet }
+  components: {
+    HomeFormBottomSheet,
+    FieldTextField,
+    FieldFileInput,
+    FieldErrorMessage,
+    FieldSelect,
+    FieldCheckbox,
+  }
 };
 </script>
 

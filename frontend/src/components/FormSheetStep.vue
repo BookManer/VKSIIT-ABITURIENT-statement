@@ -24,7 +24,7 @@ export default {
             this.$refs.generatedSheet.next();
         }
     },
-    components: { GeneratorSheet }
+    components: {GeneratorSheet},
 }
 </script>
 

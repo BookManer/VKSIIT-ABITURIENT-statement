@@ -1,4 +1,40 @@
-import { required, maxLength, minLength, email, decimal, } from 'vuelidate/lib/validators';
+import { required, maxLength, minLength, email } from 'vuelidate/lib/validators';
+import decimal from 'vuelidate/lib/validators/decimal';
+
+const limitAverageMark = (value) => {
+    return value >= 2 && value <= 5;
+};
+
+export const $v = {
+    required: {
+        error_message: 'Обязательно для заполнения',
+        valid: required,
+    },
+    maxLength(value) {
+        return {
+            error_message: `Превышен лимит в ${value} символов`,
+            valid: maxLength(value),
+        }    
+    },
+    minLength(value) {
+        return {
+            error_message: `Недостаточно символов, нужно как минимум ${value}`,
+            valid: minLength(value),
+        }
+    },
+    email: {
+        error_message: 'Некорректно введена почта',
+        valid: email,
+    },
+    decimal: {
+        error_message: 'Число должно быть десятичным',
+        valid: decimal,
+    },
+    limitAverageMark: {
+        error_message: 'Допустымый диапазон значений [от 2 до 5]',
+        valid: limitAverageMark,
+    }
+};
 
 export default [
     // Model's a form for sheet 
@@ -16,9 +52,9 @@ export default [
                 },           
                 valid_model: 'second_name',
                 validators: {
-                    required,
+                    required: $v.required,
                 },
-                folderComponent: 'VTextField', 
+                folderComponent: 'FieldTextField', 
                 component: 'v-text-field',
             },  {
                 attrs: {
@@ -30,10 +66,10 @@ export default [
                 },                
                 valid_model: 'first_name',
                 validators: {
-                    required,
+                    required: $v.required,
                     
                 },
-                folderComponent: 'VTextField', 
+                folderComponent: 'FieldTextField', 
                 component: 'v-text-field',
             },  {
                 attrs: {
@@ -45,10 +81,9 @@ export default [
                 },                
                 valid_model: 'third_name',
                 validators: {
-                    required,
-                    
+                    required: $v.required,
                 }, 
-                folderComponent: 'VTextField', 
+                folderComponent: 'FieldTextField', 
                 component: 'v-text-field',
             },  {
                 attrs: {
@@ -60,9 +95,9 @@ export default [
                 },                
                 valid_model: 'date_birthday',
                 validators: {
-                    required,
+                    required: $v.required,
                 },
-                folderComponent: 'VTextField',  
+                folderComponent: 'FieldTextField',  
                 component: 'v-text-field',
             },  {
                 attrs: {
@@ -75,9 +110,9 @@ export default [
                 },                
                 valid_model: 'place_live',
                 validators: {
-                    required,
+                    required: $v.required,
                 },
-                folderComponent: 'VTextField',  
+                folderComponent: 'FieldTextField',  
                 component: 'v-text-field',
             },  {
                 attrs: {
@@ -89,11 +124,11 @@ export default [
                 },              
                 valid_model: 'number_phone',
                 validators: {
-                    required,
-                    minLength: minLength(11),
-                    maxLength: maxLength(12),
+                    required: $v.required,
+                    minLength: $v.minLength(11),
+                    maxLength: $v.maxLength(12),
                 },
-                folderComponent: 'VTextField', 
+                folderComponent: 'FieldTextField', 
                 component: 'v-text-field',
             },  {
                 attrs: {
@@ -105,10 +140,10 @@ export default [
                 },               
                 valid_model: 'email',  
                 validators: {
-                    required,
-                    email,
+                    required: $v.required,
+                    email: $v.email,
                 },
-                folderComponent: 'VTextField', 
+                folderComponent: 'FieldTextField', 
                 component: 'v-text-field',
             }
         ]
@@ -126,11 +161,11 @@ export default [
                 },           
                 valid_model: 'attestat_seria',
                 validators: {
-                    required,
-                    minLength: minLength(3),
-                    maxLength: maxLength(3)
+                    required: $v.required,
+                    minLength: $v.minLength(3),
+                    maxLength: $v.maxLength(3)
                 },
-                folderComponent: 'VTextField', 
+                folderComponent: 'FieldTextField', 
                 component: 'v-text-field',
             },  {
                 attrs: {
@@ -142,11 +177,11 @@ export default [
                 },                
                 valid_model: 'attestat_number',  
                 validators: {
-                    required,
-                    minLength: minLength(9),
-                    maxLength: maxLength(9)
+                    required: $v.required,
+                    minLength: $v.minLength(9),
+                    maxLength: $v.maxLength(9)
                 },
-                folderComponent: 'VTextField', 
+                folderComponent: 'FieldTextField', 
                 component: 'v-text-field',
             },  {
                 attrs: {
@@ -158,10 +193,11 @@ export default [
                 },                
                 valid_model: 'average_mark',
                 validators: {
-                    required,
-                    decimal,
+                    required: $v.required,
+                    decimal: $v.decimal,
+                    limitAverageMark: $v.limitAverageMark,
                 },
-                folderComponent: 'VTextField', 
+                folderComponent: 'FieldTextField', 
                 component: 'v-text-field',
             },  {
                 attrs: {
@@ -171,10 +207,10 @@ export default [
                     label: 'Копия аттестата',
                     flat: true,
                 },
-                folderComponent: 'VFileInput',              
+                folderComponent: 'FieldFileInput',              
                 valid_model: 'copy_attestat',  
                 validators: {
-                    required,
+                    required: $v.required,
                 },
                 component: 'v-file-input',
             }
@@ -193,11 +229,11 @@ export default [
                 },           
                 valid_model: 'pasport_seria',
                 validators: {
-                    required,
-                    minLength: minLength(4),
-                    maxLength: maxLength(4)
+                    required: $v.required,
+                    minLength: $v.minLength(4),
+                    maxLength: $v.maxLength(4)
                 },
-                folderComponent: 'VTextField', 
+                folderComponent: 'FieldTextField', 
                 component: 'v-text-field',
             },  {
                 attrs: {
@@ -209,11 +245,11 @@ export default [
                 },                
                 valid_model: 'pasport_number',
                 validators: {
-                    required,
-                    minLength: minLength(6),
-                    maxLength: maxLength(6)
+                    required: $v.required,
+                    minLength: $v.minLength(6),
+                    maxLength: $v.maxLength(6)
                 },
-                folderComponent: 'VTextField', 
+                folderComponent: 'FieldTextField', 
                 component: 'v-text-field',
             },  {
                 attrs: {
@@ -225,9 +261,9 @@ export default [
                 },                
                 valid_model: 'by_someone_gived',
                 validators: {
-                    required,
+                    required: $v.required,
                 },  
-                folderComponent: 'VTextField', 
+                folderComponent: 'FieldTextField', 
                 component: 'v-text-field',
             },  {
                 attrs: {
@@ -237,10 +273,10 @@ export default [
                 props: {
                     label: 'Дата выдачи',
                 },
-                folderComponent: 'VTextField',              
+                folderComponent: 'FieldTextField',              
                 valid_model: 'date_giving',
                 validators: {
-                    required,
+                    required: $v.required,
                 },  
                 component: 'v-text-field',
             }, {
@@ -253,9 +289,9 @@ export default [
                 },
                 valid_model: 'scan_pasport',
                 validators: {
-                    required,
+                    required: $v.required,
                 },
-                folderComponent: 'VFileInput',
+                folderComponent: 'FieldFileInput',
                 component: 'v-file-input',
             }
         ]
@@ -273,9 +309,9 @@ export default [
                 },           
                 valid_model: 'specialty',
                 validators: {
-                    required,
+                    required: $v.required,
                 },
-                folderComponent: 'VSelect', 
+                folderComponent: 'FieldSelect', 
                 component: 'v-select',
             }, {
                 attrs: {
@@ -305,9 +341,9 @@ export default [
                 },           
                 valid_model: 'category_sirot',
                 validators: {
-                    required,
+                    required: $v.required,
                 }, 
-                folderComponent: 'VSelect', 
+                folderComponent: 'FieldSelect', 
                 component: 'v-select',
             }, {
                 attrs: {
@@ -317,7 +353,7 @@ export default [
                     label: 'Нуждаюсь в общежитии',
                 },           
                 valid_model: 'need_dormitory',
-                folderComponent: 'VCheckbox', 
+                folderComponent: 'FieldCheckbox', 
                 component: 'v-checkbox',
             }, {
                 attrs: {
@@ -327,7 +363,7 @@ export default [
                     label: 'Согласие родителей',
                 },           
                 valid_model: 'agree_parents',
-                folderComponent: 'VCheckbox', 
+                folderComponent: 'FieldCheckbox', 
                 component: 'v-checkbox',
             }, {
                 attrs: {
@@ -338,9 +374,9 @@ export default [
                 },           
                 valid_model: 'agree_personal_data',
                 validators: {
-                    required,
+                    required: $v.required,
                 },
-                folderComponent: 'VCheckbox', 
+                folderComponent: 'FieldCheckbox', 
                 component: 'v-checkbox',
             }
         ]
