@@ -29,6 +29,7 @@
               v-model="form[field.valid_model]"
               @checkValid="onCheckValidateField($event)"
             >
+            {{validateObjectForm}}
               <template v-slot:default="{ validation }">
                 <FieldErrorMessage
                   :validateFieldObject="validation"

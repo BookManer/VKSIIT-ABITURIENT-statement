@@ -19,16 +19,22 @@ export default {
     },
     mixins: [validationMixin],
     name: 'FieldSelect',
+    computed: {
+        hasCategorySirot() {
+            return this.DOMAttrs.name === 'category_sirot';
+        }
+    },
     methods: {
         onChange($event) {
             const {propValidModel} = this;
 
             this.form[propValidModel] = $event;
+            
             this.$emit('change', $event);
             this.$emit('checkValid', {type_field:propValidModel, isValid: this.isValid});
         },
         getSelectItems() {
-            if (this.DOMAttrs.name === 'category_sirot') {
+            if (this.hasCategorySirot) {
                 return this.componentAttrs.items.map(({type}) => type); 
             }
             

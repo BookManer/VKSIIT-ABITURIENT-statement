@@ -347,6 +347,15 @@ export default [
                 component: 'v-select',
             }, {
                 attrs: {
+                    name: 'accepted_document',
+                },
+                props: {
+                    label: 'Подтверждающий документ',
+                },
+                valid_model: 'accepted_document',
+                folderComponent: 'FieldFileInput',
+            }, {
+                attrs: {
                     name: 'need_dormitory',
                 },
                 props: {
