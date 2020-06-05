@@ -62,5 +62,6 @@ server.post(`/${API}/sendMail`, (req, res) => {
                 }
             })
         }
+        res.status(500).send('fail');
     }
 })
