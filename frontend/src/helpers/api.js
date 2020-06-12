@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const hostname = 'https://integral-hold-278909.uc.r.appspot.com';
+// const hostname = 'https://integral-hold-278909.uc.r.appspot.com';
+const hostname = 'http://localhost:3000';
 
 const apiFormData = axios.create({
     baseURL: `${hostname}/api/methods`,

@@ -42,6 +42,7 @@ server.post(`/${API}/sendMail`, (req, res) => {
             res.send('ok');
         });
     } else if (req.headers['content-type'].indexOf('json') != -1) {
+        console.log(req.body);
         if (Object.entries(formDataObject).length != 0) {
             let mailOptions = {
                 from: req.body.email,
@@ -57,11 +58,12 @@ server.post(`/${API}/sendMail`, (req, res) => {
                 } else {
                     const message = `Ваша заявка отправлена успешно. Благодарим,
                     что выбрали нашу учебное заведение.
-                    Письмо было отправлено на почту ${mailOptions.to}`;
+                    Письмо было отправлено на почту ${mailOptions.to}`; 
                     res.status(200).send(message);
                 }
             })
         }
-        res.status(500).send('fail');
+        console.log(res);
+        res.send('Маша, я люблю тебя!!!');
     }
 })
